@@ -3,385 +3,512 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Walking Dead: Matric Proposal</title>
+<title>The Walking Dead: Matric Proposal</title>
+<!-- Phaser 3 Game Engine -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 <style>
-  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-  body {
-    background-color: #0b0c10;
-    color: #c5c6c7;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin: 0;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden;
-  }
-  #game-wrapper {
-    width: 100%;
-    max-width: 420px;
-    background: #1f2833;
-    border: 3px solid #45a29e;
-    border-radius: 12px;
-    padding: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  h1 {
-    font-size: 1.1rem;
-    color: #66fcf1;
-    margin: 0 0 8px 0;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-align: center;
-  }
-  .hud {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    background: #0b0c10;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    border-left: 4px solid #66fcf1;
-  }
-  canvas {
-    background: #111418;
-    border: 2px solid #283747;
-    border-radius: 6px;
-    display: block;
-    margin-bottom: 10px;
-  }
-  .controls-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .btn {
-    width: 100%;
-    background: #45a29e;
-    color: #0b0c10;
-    border: none;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-  }
-  .btn:active { background: #66fcf1; }
-  .btn-danger { background: #c0392b; color: white; }
-  .btn-success { background: #27ae60; color: white; }
-  
-  .dpad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    width: 190px;
-    margin: 0 auto;
-  }
-  .dpad-btn {
-    background: #283747;
-    color: white;
-    border: 2px solid #45a29e;
-    padding: 15px 0;
-    font-size: 1.3rem;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: center;
-    touch-action: none;
-  }
-  .dpad-btn:active, .dpad-btn.pressed { background: #66fcf1; color: #0b0c10; }
-  
-  .proposal-card {
-    background: #111;
-    border: 3px solid #e74c3c;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-  }
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+  body {
+    background: #050508;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background: #12131c;
+    border: 3px solid #2d3748;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.95);
+  }
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a202c;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    border-left: 4px solid #ed8936;
+  }
+  .stat-bar {
+    width: 70px;
+    height: 8px;
+    background: #2d3748;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .stat-fill-hp { height: 100%; width: 100%; background: #e53e3e; transition: width 0.2s; }
+  .stat-fill-stamina { height: 100%; width: 100%; background: #38a169; transition: width 0.1s; }
+  
+  #phaser-canvas {
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 0 12px #000;
+  }
+
+  .controls-panel {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .btn {
+    flex: 1;
+    background: #3182ce;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    touch-action: none;
+  }
+  .btn:active, .btn.active { transform: translateY(1px); background: #2b6cb0; }
+  .btn-danger { background: #e53e3e; }
+  .btn-success { background: #38a169; }
+
+  .dpad-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+  }
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    width: 150px;
+  }
+  .dpad-btn {
+    background: #2d3748;
+    color: white;
+    border: 1px solid #4a5568;
+    padding: 12px 0;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+    touch-action: none;
+  }
+  .dpad-btn:active, .dpad-btn.active { background: #4a5568; color: #63b3ed; }
+
+  .action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 140px;
+  }
+
+  .proposal-card {
+    background: #1a202c;
+    border: 3px solid #ed8936;
+    padding: 24px 16px;
+    border-radius: 10px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
 </style>
 </head>
 <body>
 
-<div id="game-wrapper">
-  <h1>The Walking Dead</h1>
-  <div class="hud">
-    <span id="hud-stage">Stage: 1/5</span>
-    <span id="hud-health">Health: 100%</span>
-    <span id="hud-info">Reach Gate ➡️</span>
-  </div>
+<div id="game-container">
+  <div class="hud">
+    <div>
+      <span>HP </span><div class="stat-bar"><div id="hp-bar" class="stat-fill-hp"></div></div>
+    </div>
+    <div>
+      <span>STM </span><div class="stat-bar"><div id="stm-bar" class="stat-fill-stamina"></div></div>
+    </div>
+    <span id="hud-stage">Stage 1: Outskirts</span>
+  </div>
 
-  <canvas id="gameCanvas" width="380" height="240"></canvas>
+  <div id="phaser-canvas"></div>
 
-  <div id="interactive-area" class="controls-container"></div>
+  <div id="ui-panel" class="controls-panel"></div>
 </div>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+// --- GAME ENGINE SETUP ---
+let gameState = {
+  stage: 1,
+  health: 100,
+  stamina: 100,
+  crates: 0,
+  hasKatana: false,
+  neganHp: 100,
+  keys: { up: false, down: false, left: false, right: false, sprint: false, attack: false },
+  puzzleState: [false, false, false]
+};
 
-// Render Character Sprites dynamically based on uploaded character artwork
-function createCharacterSprite(type) {
-  const c = document.createElement('canvas');
-  c.width = 40; c.height = 50;
-  const cx = c.getContext('2d');
-  
-  if (type === 'michonne') {
-    // Michonne - Headband, Dreadlocks & Katana
-    cx.fillStyle = "#111"; cx.fillRect(8, 2, 24, 18); // Dreads
-    cx.fillStyle = "#8e44ad"; cx.fillRect(8, 8, 24, 4); // Purple Headband
-    cx.fillStyle = "#5d4037"; cx.fillRect(12, 12, 16, 12); // Face
-    cx.fillStyle = "#d35400"; cx.fillRect(10, 24, 20, 18); // Tan Vest
-    cx.fillStyle = "#27ae60"; cx.fillRect(12, 42, 16, 8); // Green Pants
-    cx.strokeStyle = "#bdc3c7"; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(6, 10); cx.lineTo(34, 40); cx.stroke(); // Sword Sheath
-  } else if (type === 'daryl') {
-    // Daryl - Shaggy Hair, Leather Vest & Angel Wings
-    cx.fillStyle = "#4e342e"; cx.fillRect(10, 4, 20, 14); // Hair
-    cx.fillStyle = "#d7ccc8"; cx.fillRect(12, 14, 16, 10); // Face
-    cx.fillStyle = "#3e2723"; cx.fillRect(8, 24, 24, 18); // Vest
-    cx.fillStyle = "#ffffff"; cx.fillRect(10, 28, 4, 10); cx.fillRect(26, 28, 4, 10); // Wings
-    cx.fillStyle = "#2c3e50"; cx.fillRect(12, 42, 16, 8); // Jeans
-  } else if (type === 'negan') {
-    // Negan - Black Leather Jacket, Red Scarf & Lucille
-    cx.fillStyle = "#111"; cx.fillRect(12, 2, 16, 8); // Slick Hair
-    cx.fillStyle = "#d7ccc8"; cx.fillRect(12, 10, 16, 10); // Face
-    cx.fillStyle = "#c0392b"; cx.fillRect(10, 20, 20, 5); // Red Scarf
-    cx.fillStyle = "#212121"; cx.fillRect(8, 25, 24, 18); // Jacket
-    cx.strokeStyle = "#8d6e63"; cx.lineWidth = 4; cx.beginPath(); cx.moveTo(30, 10); cx.lineTo(36, 38); cx.stroke(); // Lucille Bat
-  } else {
-    // Walker - Decayed Greenish Skin & Torn Blue Uniform
-    cx.fillStyle = "#37474f"; cx.fillRect(10, 4, 20, 12); // Messy Hair
-    cx.fillStyle = "#607d8b"; cx.fillRect(12, 12, 16, 10); // Decayed Face
-    cx.fillStyle = "#e74c3c"; cx.fillRect(14, 15, 3, 3); cx.fillRect(21, 15, 3, 3); // Red Eyes
-    cx.fillStyle = "#283747"; cx.fillRect(8, 22, 24, 18); // Torn Jacket
-    cx.fillStyle = "#c0392b"; cx.fillRect(14, 28, 6, 8); // Blood Stain
-  }
-  return c;
+const config = {
+  type: Phaser.AUTO,
+  width: 420,
+  height: 250,
+  parent: 'phaser-canvas',
+  pixelArt: true,
+  physics: { default: 'arcade', arcade: { debug: false } },
+  scene: { preload: preload, create: create, update: update }
+};
+
+let gameScene, player, walkers = [], cratesList = [], darylObj, neganObj, gateObj, katanaSlashFx;
+
+const game = new Phaser.Game(config);
+
+function preload() {
+  gameScene = this;
+
+  // Stardew Valley Style Pixel Textures
+  createTileTexture('grass_bg', '#274e13', '#1e3a0e');
+  createTileTexture('compound_bg', '#343a40', '#212529');
+  createTileTexture('forest_bg', '#1c2833', '#111822');
+  createTileTexture('courtyard_bg', '#4a5568', '#2d3748');
+  createTileTexture('sanctuary_bg', '#5c3a21', '#3b2312');
+  
+  // Character Textures
+  createMichonneTexture();
+  createWalkerTexture();
+  createDarylTexture();
+  createNeganTexture();
+  createCrateTexture();
 }
 
-const sprites = {
-  michonne: createCharacterSprite('michonne'),
-  daryl: createCharacterSprite('daryl'),
-  negan: createCharacterSprite('negan'),
-  walker: createCharacterSprite('walker')
-};
+function create() {
+  buildStageEnvironment(this);
+  spawnStageEntities(this);
+  updateUI();
+}
 
-let game = {
-  stage: 1,
-  health: 100,
-  supplies: 0,
-  hasSword: false,
-  neganHp: 100,
-  keys: { up: false, down: false, left: false, right: false },
-  player: { x: 30, y: 100, speed: 2.2 },
-  entities: []
-};
+function update() {
+  if (!player || gameState.health <= 0) return;
 
-function initStage() {
-  game.entities = [];
-  if (game.stage === 1) {
-    for(let i=0; i<4; i++) {
-      game.entities.push({ x: 130 + i*60, y: 30 + Math.random()*150, vx: -0.6, type: 'walker' });
-    }
-  } else if (game.stage === 2) {
-    game.supplies = 0;
-    for(let i=0; i<3; i++) {
-      game.entities.push({ x: 110 + i*80, y: 40 + Math.random()*140, type: 'crate', collected: false });
-    }
-    for(let i=0; i<3; i++) {
-      game.entities.push({ x: 160 + i*60, y: 50 + i*40, vx: 0.5, type: 'walker' });
-    }
-  } else if (game.stage === 3) {
-    game.entities.push({ x: 280, y: 95, type: 'daryl' });
-  } else if (game.stage === 4) {
-    game.entities.push({ x: 280, y: 95, type: 'negan', vx: 1.2 });
-  }
-  updateUI();
+  // Stamina Recovery
+  if (!gameState.keys.sprint && gameState.stamina < 100) {
+    gameState.stamina = Math.min(100, gameState.stamina + 0.25);
+    updateBar('stm-bar', gameState.stamina);
+  }
+
+  // Top-Down Physics & Sprint Mechanics
+  let isSprinting = gameState.keys.sprint && gameState.stamina > 5;
+  let speed = isSprinting ? 140 : 85;
+
+  if (isSprinting) {
+    gameState.stamina = Math.max(0, gameState.stamina - 0.5);
+    updateBar('stm-bar', gameState.stamina);
+  }
+
+  player.body.setVelocity(0);
+
+  if (gameState.keys.left) { player.body.setVelocityX(-speed); player.flipX = true; }
+  else if (gameState.keys.right) { player.body.setVelocityX(speed); player.flipX = false; }
+
+  if (gameState.keys.up) { player.body.setVelocityY(-speed); }
+  else if (gameState.keys.down) { player.body.setVelocityY(speed); }
+
+  // Stage Specific Triggers
+  if (gameState.stage === 1 && player.x > 385) {
+    advanceStage(2);
+  }
+}
+
+// --- PIXEL SPRITE GENERATORS ---
+function createTileTexture(key, color1, color2) {
+  let c = gameScene.textures.createCanvas(key, 16, 16);
+  let ctx = c.context;
+  ctx.fillStyle = color1; ctx.fillRect(0,0,16,16);
+  ctx.fillStyle = color2; ctx.fillRect(0,0,8,8); ctx.fillRect(8,8,8,8);
+  c.refresh();
+}
+
+function createMichonneTexture() {
+  let c = gameScene.textures.createCanvas('michonne', 24, 32);
+  let ctx = c.context;
+  ctx.fillStyle = '#111'; ctx.fillRect(4,2,16,12); // Dreadlocks
+  ctx.fillStyle = '#9b59b6'; ctx.fillRect(4,6,16,3); // Purple Headband
+  ctx.fillStyle = '#6e473b'; ctx.fillRect(6,9,12,7); // Face
+  ctx.fillStyle = '#d35400'; ctx.fillRect(4,16,16,10); // Tan Vest
+  if (gameState.hasKatana) {
+    ctx.fillStyle = '#bdc3c7'; ctx.fillRect(18,6,3,20); // Katana on back
+  }
+  c.refresh();
+}
+
+function createWalkerTexture() {
+  let c = gameScene.textures.createCanvas('walker', 24, 32);
+  let ctx = c.context;
+  ctx.fillStyle = '#4a5d4e'; ctx.fillRect(6,4,12,10); // Rotting Skin
+  ctx.fillStyle = '#e53e3e'; ctx.fillRect(8,8,2,2); ctx.fillRect(14,8,2,2); // Eyes
+  ctx.fillStyle = '#2c3e50'; ctx.fillRect(4,14,16,12); // Blue Shirt
+  c.refresh();
+}
+
+function createDarylTexture() {
+  let c = gameScene.textures.createCanvas('daryl', 24, 32);
+  let ctx = c.context;
+  ctx.fillStyle = '#4a3728'; ctx.fillRect(6,2,12,8); // Hair
+  ctx.fillStyle = '#e2e8f0'; ctx.fillRect(6,8,12,6); // Face
+  ctx.fillStyle = '#2d3748'; ctx.fillRect(4,14,16,12); // Angel Vest
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(6,16,3,8); ctx.fillRect(15,16,3,8); // Wings
+  c.refresh();
+}
+
+function createNeganTexture() {
+  let c = gameScene.textures.createCanvas('negan', 24, 32);
+  let ctx = c.context;
+  ctx.fillStyle = '#1a202c'; ctx.fillRect(6,2,12,6); // Slick Hair
+  ctx.fillStyle = '#edf2f7'; ctx.fillRect(6,8,12,6);
+  ctx.fillStyle = '#e53e3e'; ctx.fillRect(6,14,12,3); // Red Scarf
+  ctx.fillStyle = '#171923'; ctx.fillRect(4,17,16,10); // Leather Jacket
+  ctx.fillStyle = '#8b5a2b'; ctx.fillRect(18,8,3,18); // Lucille
+  c.refresh();
+}
+
+function createCrateTexture() {
+  let c = gameScene.textures.createCanvas('crate', 20, 20);
+  let ctx = c.context;
+  ctx.fillStyle = '#795548'; ctx.fillRect(0,0,20,20);
+  ctx.fillStyle = '#e53e3e'; ctx.fillRect(8,8,4,4); // Pulsing Red Light
+  c.refresh();
+}
+
+// --- ENVIRONMENT BUILDER ---
+function buildStageEnvironment(scene) {
+  let bgKeys = ['grass_bg', 'compound_bg', 'forest_bg', 'courtyard_bg', 'sanctuary_bg'];
+  let bgKey = bgKeys[gameState.stage - 1];
+
+  for (let x = 0; x < 420; x += 16) {
+    for (let y = 0; y < 250; y += 16) {
+      scene.add.image(x, y, bgKey).setOrigin(0);
+    }
+  }
+
+  if (gameState.stage === 1) {
+    // Tall grass patches & gate
+    scene.add.rectangle(408, 125, 12, 230, 0x4a5568);
+  } else if (gameState.stage === 3) {
+    // Campfire glow
+    scene.add.circle(300, 125, 20, 0xed8936, 0.7);
+  }
+}
+
+function spawnStageEntities(scene) {
+  player = scene.physics.add.sprite(40, 125, 'michonne');
+  player.setCollideWorldBounds(true);
+
+  walkers = []; cratesList = [];
+
+  if (gameState.stage === 1 || gameState.stage === 2) {
+    let count = gameState.stage === 1 ? 4 : 3;
+    for (let i = 0; i < count; i++) {
+      let w = scene.physics.add.sprite(150 + i * 65, 40 + Math.random() * 160, 'walker');
+      scene.physics.add.overlap(player, w, takeDamage, null, scene);
+      walkers.push(w);
+    }
+  }
+
+  if (gameState.stage === 2) {
+    for (let i = 0; i < 3; i++) {
+      let c = scene.physics.add.sprite(130 + i * 85, 50 + Math.random() * 130, 'crate');
+      scene.physics.add.overlap(player, c, collectCrate, null, scene);
+      cratesList.push(c);
+    }
+  }
+
+  if (gameState.stage === 3) {
+    darylObj = scene.add.sprite(300, 125, 'daryl');
+  }
+
+  if (gameState.stage === 4) {
+    neganObj = scene.physics.add.sprite(290, 125, 'negan');
+  }
+}
+
+function takeDamage() {
+  gameState.health = Math.max(0, gameState.health - 0.4);
+  updateBar('hp-bar', gameState.health);
+  if (gameState.health <= 0) {
+    player.disableBody(true, true);
+    updateUI();
+  }
+}
+
+function collectCrate(p, crate) {
+  crate.destroy();
+  gameState.crates++;
+  if (gameState.crates >= 3) {
+    advanceStage(3);
+  }
+  updateUI();
+}
+
+function advanceStage(next) {
+  gameState.stage = next;
+  gameScene.scene.restart();
+}
+
+function updateBar(id, val) {
+  let el = document.getElementById(id);
+  if (el) el.style.width = `${val}%`;
 }
 
 function updateUI() {
-  document.getElementById("hud-stage").innerText = `Stage: ${game.stage}/5`;
-  document.getElementById("hud-health").innerText = `Health: ${Math.max(0, Math.floor(game.health))}%`;
-  
-  const area = document.getElementById("interactive-area");
-  
-  if (game.health <= 0) {
-    area.innerHTML = `<button class="btn btn-danger" onclick="resetGame()">Overrun! Tap to Try Again</button>`;
-    return;
-  }
+  let stageTitles = [
+    "Stage 1: The Outskirts",
+    "Stage 2: Supply Run",
+    "Stage 3: The Exchange",
+    "Stage 4: The Showdown",
+    "Stage 5: The Sanctuary"
+  ];
+  document.getElementById("hud-stage").innerText = stageTitles[gameState.stage - 1];
 
-  if (game.stage === 1 || game.stage === 2) {
-    document.getElementById("hud-info").innerText = game.stage === 1 ? "Reach Gate ➡️" : `Crates: ${game.supplies}/3`;
-    area.innerHTML = `
-      <div class="dpad">
-        <div></div><button class="dpad-btn" id="btn-up">⬆️</button><div></div>
-        <button class="dpad-btn" id="btn-left">⬅️</button>
-        <button class="dpad-btn" id="btn-down">⬇️</button>
-        <button class="dpad-btn" id="btn-right">➡️</button>
-      </div>
-    `;
-    setupTouchControls();
-  } else if (game.stage === 3) {
-    document.getElementById("hud-info").innerText = "Meet Daryl";
-    if (!game.hasSword) {
-      area.innerHTML = `<button class="btn btn-success" onclick="tradeDaryl()">Hand 3 Crates to Daryl for Katana</button>`;
-    } else {
-      area.innerHTML = `<button class="btn btn-danger" onclick="slashWalkers()">Slash Ambushing Walkers with Sword!</button>`;
-    }
-  } else if (game.stage === 4) {
-    document.getElementById("hud-info").innerText = `Negan HP: ${game.neganHp}%`;
-    area.innerHTML = `
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-danger" onclick="attackNegan('heavy')">Precision Katana Strike</button>
-        <button class="btn" onclick="attackNegan('dodge')">Dodge & Counter Attack</button>
-      </div>
-    `;
-  } else if (game.stage === 5) {
-    document.getElementById("hud-info").innerText = "Basement Vault";
-    area.innerHTML = `
-      <div style="text-align:center; font-size:0.85rem; margin-bottom:6px; color:#66fcf1;">Enter 3-Digit Code (1 - 2 - 3):</div>
-      <div style="display:flex; justify-content:center; gap:10px;">
-        <button class="btn" style="width:60px;" onclick="pressCode(1)">1</button>
-        <button class="btn" style="width:60px;" onclick="pressCode(2)">2</button>
-        <button class="btn" style="width:60px;" onclick="pressCode(3)">3</button>
-      </div>
-    `;
-  }
+  let panel = document.getElementById("ui-panel");
+
+  if (gameState.health <= 0) {
+    panel.innerHTML = `<button class="btn btn-danger" onclick="restartGame()">You Were Overrun! Tap to Retry</button>`;
+    return;
+  }
+
+  if (gameState.stage === 1 || gameState.stage === 2) {
+    panel.innerHTML = `
+      <div class="dpad-container">
+        <div class="dpad">
+          <div></div><button class="dpad-btn" id="btn-up">⬆️</button><div></div>
+          <button class="dpad-btn" id="btn-left">⬅️</button>
+          <button class="dpad-btn" id="btn-down">⬇️</button>
+          <button class="dpad-btn" id="btn-right">➡️</button>
+        </div>
+        <div class="action-btns">
+          <button class="btn btn-success" id="btn-sprint">RUN 🏃</button>
+        </div>
+      </div>
+    `;
+    setupDpadControls();
+  } else if (gameState.stage === 3) {
+    if (!gameState.hasKatana) {
+      panel.innerHTML = `<button class="btn btn-success" onclick="tradeDaryl()">Hand 3 Crates to Daryl for Katana</button>`;
+    } else {
+      panel.innerHTML = `<button class="btn btn-danger" onclick="slashAmbushWave()">Slash Ambushing Walker Wave!</button>`;
+    }
+  } else if (gameState.stage === 4) {
+    panel.innerHTML = `
+      <div class="btn-row">
+        <button class="btn btn-danger" onclick="attackNegan('katana')">Katana Precision Strike</button>
+        <button class="btn" onclick="attackNegan('dodge')">Dodge Lucille Swing</button>
+      </div>
+    `;
+  } else if (gameState.stage === 5) {
+    panel.innerHTML = `
+      <div style="text-align:center; font-size:0.85rem; margin-bottom:4px;">Align 3 Survival Artifacts on Stone Altar:</div>
+      <div class="btn-row">
+        <button class="btn" onclick="solvePuzzle(0)">Place Compass</button>
+        <button class="btn" onclick="solvePuzzle(1)">Place Pocket Watch</button>
+        <button class="btn" onclick="solvePuzzle(2)">Place Sheriff Badge</button>
+      </div>
+    `;
+  }
 }
 
-function bindPress(id, keyName) {
-  const el = document.getElementById(id);
-  if(!el) return;
-  
-  const start = (e) => { e.preventDefault(); game.keys[keyName] = true; el.classList.add('pressed'); };
-  const end = (e) => { e.preventDefault(); game.keys[keyName] = false; el.classList.remove('pressed'); };
+function setupDpadControls() {
+  const map = { 'btn-up': 'up', 'btn-down': 'down', 'btn-left': 'left', 'btn-right': 'right' };
+  Object.keys(map).forEach(id => {
+    let el = document.getElementById(id);
+    if (!el) return;
+    let k = map[id];
+    let start = (e) => { e.preventDefault(); gameState.keys[k] = true; el.classList.add('active'); };
+    let end = (e) => { e.preventDefault(); gameState.keys[k] = false; el.classList.remove('active'); };
+    el.addEventListener('touchstart', start, {passive:false});
+    el.addEventListener('touchend', end, {passive:false});
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+  });
 
-  el.addEventListener('touchstart', start, {passive: false});
-  el.addEventListener('touchend', end, {passive: false});
-  el.addEventListener('mousedown', start);
-  el.addEventListener('mouseup', end);
+  let sp = document.getElementById('btn-sprint');
+  if (sp) {
+    let start = (e) => { e.preventDefault(); gameState.keys.sprint = true; sp.classList.add('active'); };
+    let end = (e) => { e.preventDefault(); gameState.keys.sprint = false; sp.classList.remove('active'); };
+    sp.addEventListener('touchstart', start, {passive:false});
+    sp.addEventListener('touchend', end, {passive:false});
+    sp.addEventListener('mousedown', start);
+    sp.addEventListener('mouseup', end);
+  }
 }
 
-function setupTouchControls() {
-  bindPress('btn-up', 'up');
-  bindPress('btn-down', 'down');
-  bindPress('btn-left', 'left');
-  bindPress('btn-right', 'right');
+function tradeDaryl() {
+  gameState.hasKatana = true;
+  createMichonneTexture();
+  updateUI();
 }
 
-let enteredCode = [];
-function pressCode(n) {
-  enteredCode.push(n);
-  if (enteredCode.length === 3) {
-    if (enteredCode.join('') === '123') {
-      triggerProposal();
-    } else {
-      alert("Wrong code! Try entering 1, 2, 3");
-      enteredCode = [];
-    }
-  }
+function slashAmbushWave() {
+  advanceStage(4);
 }
-
-function tradeDaryl() { game.hasSword = true; updateUI(); }
-function slashWalkers() { game.stage = 4; initStage(); }
 
 function attackNegan(type) {
-  if (type === 'heavy') { game.neganHp -= 35; game.health -= 8; } 
-  else { game.neganHp -= 20; }
-  if (game.neganHp <= 0) { game.stage = 5; initStage(); }
-  updateUI();
+  if (type === 'katana') {
+    gameState.neganHp -= 35;
+    gameState.health -= 8;
+  } else {
+    gameState.neganHp -= 20;
+  }
+
+  updateBar('hp-bar', gameState.health);
+
+  if (gameState.neganHp <= 0) {
+    advanceStage(5);
+  } else {
+    updateUI();
+  }
 }
 
-function resetGame() {
-  game.stage = 1; game.health = 100; game.hasSword = false; game.neganHp = 100;
-  game.player.x = 30; game.player.y = 100;
-  initStage();
+function solvePuzzle(index) {
+  gameState.puzzleState[index] = true;
+  if (gameState.puzzleState.every(Boolean)) {
+    triggerProposal();
+  } else {
+    alert(`Artifact ${index + 1} placed! Keep going...`);
+  }
+}
+
+function restartGame() {
+  gameState = { stage: 1, health: 100, stamina: 100, crates: 0, hasKatana: false, neganHp: 100, keys: { up: false, down: false, left: false, right: false, sprint: false, attack: false }, puzzleState: [false, false, false] };
+  gameScene.scene.restart();
 }
 
 function triggerProposal() {
-  document.getElementById("game-wrapper").innerHTML = `
-    <h1>VICTORY!</h1>
-    <div class="proposal-card">
-      <p style="font-size: 1.05rem; line-height: 1.5; color: #fff; margin-bottom: 15px;">
-        "Out of 8 billion people, I'd still choose YOU to survive the apocalypse with."
-      </p>
-      <hr style="border:0; border-top:1px solid #444; margin: 15px 0;">
-      <h2 style="color: #66fcf1; font-size: 1.15rem; margin-bottom: 20px;">
-        Will you be my Rick to my Michonne at Matric Dance?
-      </h2>
-      <button class="btn btn-success" onclick="alert('YES! ❤️ Best apocalyptic date ever!')">YES! ❤️</button>
-    </div>
-  `;
+  document.getElementById("game-container").innerHTML = `
+    <div class="proposal-card">
+      <h1 style="color:#ed8936; font-size:1.2rem; margin-bottom:12px;">VAULT OPENED</h1>
+      <p style="font-size: 1rem; line-height: 1.5; color: #edf2f7; margin-bottom: 18px;">
+        "Out of 8 billion people, I'd still choose YOU to survive the apocalypse with."
+      </p>
+      <hr style="border:0; border-top:1px solid #4a5568; margin: 15px 0;">
+      <h2 style="color: #63b3ed; font-size: 1.1rem; margin-bottom: 20px;">
+        Will you be my Rick to my Michonne at Matric Dance?
+      </h2>
+      <button class="btn btn-success" onclick="alert('YES! ❤️ Best apocalyptic date ever!')">YES! ❤️</button>
+    </div>
+  `;
 }
-
-function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Background environments
-  if (game.stage === 1) {
-    ctx.fillStyle = "#1b382b"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#555"; ctx.fillRect(350, 10, 15, 220); // Gate
-  } else if (game.stage === 2) {
-    ctx.fillStyle = "#2c3e50"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.fillStyle = "#111822"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // D-Pad Movement
-  if (game.keys.up && game.player.y > 10) game.player.y -= game.player.speed;
-  if (game.keys.down && game.player.y < canvas.height - 50) game.player.y += game.player.speed;
-  if (game.keys.left && game.player.x > 10) game.player.x -= game.player.speed;
-  if (game.keys.right && game.player.x < canvas.width - 40) game.player.x += game.player.speed;
-
-  // Stage 1 Gate Trigger
-  if (game.stage === 1 && game.player.x > 330) {
-    game.stage = 2; game.player.x = 30; initStage();
-  }
-
-  // Draw Player (Michonne Detailed Sprite)
-  ctx.drawImage(sprites.michonne, game.player.x, game.player.y);
-
-  // Update & Draw Entities
-  game.entities.forEach(ent => {
-    if (ent.type === 'walker') {
-      ent.x += ent.vx;
-      if (ent.x < 20 || ent.x > 340) ent.vx *= -1;
-      ctx.drawImage(sprites.walker, ent.x, ent.y);
-
-      let dist = Math.hypot(game.player.x - ent.x, game.player.y - ent.y);
-      if (dist < 22) { game.health -= 0.5; updateUI(); }
-    } else if (ent.type === 'crate' && !ent.collected) {
-      ctx.fillStyle = "#e67e22"; ctx.fillRect(ent.x, ent.y, 18, 18);
-      ctx.fillStyle = "#f39c12"; ctx.fillRect(ent.x + 3, ent.y + 3, 12, 12);
-
-      let dist = Math.hypot(game.player.x - ent.x, game.player.y - ent.y);
-      if (dist < 22) {
-        ent.collected = true; game.supplies++;
-        if (game.supplies >= 3) { game.stage = 3; initStage(); }
-        updateUI();
-      }
-    } else if (ent.type === 'daryl') {
-      ctx.drawImage(sprites.daryl, ent.x, ent.y);
-    } else if (ent.type === 'negan') {
-      ent.x += ent.vx;
-      if (ent.x < 240 || ent.x > 330) ent.vx *= -1;
-      ctx.drawImage(sprites.negan, ent.x, ent.y);
-    }
-  });
-
-  requestAnimationFrame(loop);
-}
-
-initStage();
-loop();
 </script>
 </body>
 </html>
